@@ -31,9 +31,55 @@ Pebble.addEventListener('ready',function(e) {
 	}
 );
 
+Pebble.addEventListener('showConfiguration', function() {
+  var url = 'https://rawgit.com/nguyer/pebble-engineering/master/config/index.html';
+  console.log('Showing configuration page: ' + url);
+
+  Pebble.openURL(url);
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  var configData = JSON.parse(decodeURIComponent(e.response));
+  console.log('Configuration page returned: ' + JSON.stringify(configData));
+
+  var toggleDict = {};
+	
+	toggleDict.SHOW_NUMBERS = configData.show_numbers;
+ 	toggleDict.SHOW_SECOND_HAND = configData.show_second_hand;
+ 	toggleDict.SHOW_DATE = configData.show_date;
+	toggleDict.SHOW_TEMPERATURE = configData.show_temperature;
+	
+	var colorDict = {};
+	
+	colorDict.COLOR_BACKGROUND = parseInt(configData.background_color.substring(0), 16);
+	colorDict.COLOR_LABEL = parseInt(configData.label_color.substring(0), 16);
+	colorDict.COLOR_HOUR_MARKS = parseInt(configData.hour_mark_color.substring(0), 16);
+	colorDict.COLOR_MINUTE_MARKS = parseInt(configData.minute_mark_color.substring(0), 16);
+	colorDict.COLOR_HOUR_HAND = parseInt(configData.hour_hand_color.substring(0), 16);
+	colorDict.COLOR_MINUTE_HAND = parseInt(configData.minute_hand_color.substring(0), 16);
+	colorDict.COLOR_SECOND_HAND = parseInt(configData.second_hand_color.substring(0), 16);
+	
+	Pebble.sendAppMessage(toggleDict, function() {
+		console.log('Send toggles successful: ' + JSON.stringify(toggleDict));
+		
+		Pebble.sendAppMessage(colorDict, function() {
+			console.log('Send colors successful: ' + JSON.stringify(colorDict));
+		}, function() {
+			console.log('Send failed!');
+		});
+		
+	}, function() {
+		console.log('Send failed!');
+	});
+	
+	
+	
+	
+});
+
 function getTemp(lat, lon, callback) {
 	var req = new XMLHttpRequest();
-	var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=imperial';
+	var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=imperial&APPID=0d0bd6b864810a08eb392c04500bf80b';
 	console.log(url);
 	req.open('GET', url, true);
 	req.onload = function(e) {
@@ -54,8 +100,7 @@ function getTemp(lat, lon, callback) {
 
 function sendTemp(temp) {
 	temp = Math.round(temp);
-	console.log(temp);
-	var transactionId = Pebble.sendAppMessage( { 'TEMPERATURE': String(temp) },
+	Pebble.sendAppMessage( { 'TEMPERATURE': temp },
   function(e) {
     console.log('Successfully delivered message with transactionId='
       + e.data.transactionId);
@@ -64,6 +109,5 @@ function sendTemp(temp) {
     console.log('Unable to deliver message with transactionId='
       + e.data.transactionId
       + ' Error is: ' + e.error.message);
-  }
-);
+  });
 }
