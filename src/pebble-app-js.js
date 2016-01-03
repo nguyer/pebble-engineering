@@ -1,6 +1,13 @@
+var darkSkyApiKey = '';
+var units = 'us';
+
+if (localStorage.units) {
+	units = localStorage.units;
+}
+
 var locationOptions = {
-  enableHighAccuracy: false, 
-  maximumAge: 10000, 
+  enableHighAccuracy: false,
+  maximumAge: 10000,
   timeout: 10000
 };
 
@@ -24,33 +31,40 @@ function locationError(err) {
 Pebble.addEventListener('ready',function(e) {
 		// Request current position
 		navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
-		
+
 		setInterval(function() {
 			navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
-		}, 1800000);
+		}, 60 * 60000); // 60 minutes
 	}
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-  var url = 'https://rawgit.com/nguyer/pebble-engineering/master/config/index.html';
+  var url = 'https://rawgit.com/nguyer/pebble-engineering/b6efd85789c84acaa6bf5bce63f32ff6cca61b29/config/index.html';
   console.log('Showing configuration page: ' + url);
 
   Pebble.openURL(url);
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
-  var configData = JSON.parse(decodeURIComponent(e.response));
-  console.log('Configuration page returned: ' + JSON.stringify(configData));
+	var configData = JSON.parse(decodeURIComponent(e.response));
+	console.log('Configuration page returned: ' + JSON.stringify(configData));
 
-  var toggleDict = {};
-	
+	if (configData.units && configData.units !== units) {
+		// update units
+		units = configData.units;
+		localStorage.units = configData.units;
+		navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+	}
+
+	var toggleDict = {};
+
 	toggleDict.SHOW_NUMBERS = configData.show_numbers;
- 	toggleDict.SHOW_SECOND_HAND = configData.show_second_hand;
- 	toggleDict.SHOW_DATE = configData.show_date;
+	toggleDict.SHOW_SECOND_HAND = configData.show_second_hand;
+	toggleDict.SHOW_DATE = configData.show_date;
 	toggleDict.SHOW_TEMPERATURE = configData.show_temperature;
-	
+
 	var colorDict = {};
-	
+
 	colorDict.COLOR_BACKGROUND = parseInt(configData.background_color.substring(0), 16);
 	colorDict.COLOR_LABEL = parseInt(configData.label_color.substring(0), 16);
 	colorDict.COLOR_HOUR_MARKS = parseInt(configData.hour_mark_color.substring(0), 16);
@@ -58,35 +72,36 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	colorDict.COLOR_HOUR_HAND = parseInt(configData.hour_hand_color.substring(0), 16);
 	colorDict.COLOR_MINUTE_HAND = parseInt(configData.minute_hand_color.substring(0), 16);
 	colorDict.COLOR_SECOND_HAND = parseInt(configData.second_hand_color.substring(0), 16);
-	
+
 	Pebble.sendAppMessage(toggleDict, function() {
 		console.log('Send toggles successful: ' + JSON.stringify(toggleDict));
-		
+
 		Pebble.sendAppMessage(colorDict, function() {
 			console.log('Send colors successful: ' + JSON.stringify(colorDict));
 		}, function() {
 			console.log('Send failed!');
 		});
-		
+
 	}, function() {
 		console.log('Send failed!');
 	});
-	
-	
-	
-	
+
+
+
+
 });
 
 function getTemp(lat, lon, callback) {
 	var req = new XMLHttpRequest();
-	var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=imperial&APPID=0d0bd6b864810a08eb392c04500bf80b';
+	//var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=imperial&APPID=0d0bd6b864810a08eb392c04500bf80b';
+	var url = 'https://api.forecast.io/forecast/' + darkSkyApiKey + '/' + lat + ',' + lon + '?units=' + units;
 	console.log(url);
 	req.open('GET', url, true);
 	req.onload = function(e) {
 		if (req.readyState == 4 && req.status == 200) {
 			if(req.status == 200) {
 				var res = JSON.parse(req.responseText);
-				var temp = res.main.temp;
+				var temp = res.currently.temperature;
 				callback(null, temp);
 			}
 			else {
@@ -94,7 +109,7 @@ function getTemp(lat, lon, callback) {
 			}
 		}
 	};
-	
+
 	req.send(null);
 }
 

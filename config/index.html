@@ -51,9 +51,6 @@
           <input id='second_hand_color_picker' type='text' class='item-color item-color-normal' value='#FF0000'>
         </label>
       </div>
-      <!-- <div class='item-container-footer'>
-        Choose the app's background color. Used if High Contrast Mode is not selected. Note: Only available on Basalt watches that support many colors.
-      </div> -->
     </div>
 
     <div class='item-container'>
@@ -76,6 +73,20 @@
           <input id='show_temperature_checkbox' type='checkbox' class='item-toggle' checked="true">
         </label>
       </div>
+    </div>
+
+    <div class='item-container'>
+      <div class='item-container-header'>Units</div>
+      <div class='item-container-content'>
+        <label class='item'>
+          US
+          <input id='us_radio' type='radio' name='units' class='item-radio' value="US" checked="true"/>
+        </label>
+        <label class='item'>
+          SI
+          <input id='si_radio' type='radio' name='units' class='item-radio' value="SI"/>
+        </label>
+      </div>
       <div class='item-container-footer'>
         Watchface designed by Nicko Guyer
       </div>
@@ -83,7 +94,7 @@
 
     <div class='item-container'>
       <div class='button-container'>
-        <input id='submit_button' type='button' class='item-button' value='SUBMIT'>
+        <input id='submit_button' type='button' class='item-button' value='SAVE'>
       </div>
     </div>
   </body>
@@ -100,6 +111,13 @@
     var secondHandCheckbox = document.getElementById('show_second_hand_checkbox');
     var dateCheckbox = document.getElementById('show_date_checkbox');
     var temperatureCheckbox = document.getElementById('show_temperature_checkbox');
+    var usUnits = document.getElementById('us_radio');
+    var siUnits = document.getElementById('si_radio');
+
+    var units = 'us';
+    if (siUnits.checked) {
+      units = 'si';
+    }
 
     var options = {
       'background_color': backgroundColorPicker.value,
@@ -113,6 +131,7 @@
       'show_second_hand': secondHandCheckbox.checked,
       'show_date': dateCheckbox.checked,
       'show_temperature': temperatureCheckbox.checked,
+      'units': units
     };
 
     // Save for next launch
@@ -127,6 +146,7 @@
     localStorage['show_second_hand'] = options['show_second_hand'];
     localStorage['show_date'] = options['show_date'];
     localStorage['show_temperature'] = options['show_temperature'];
+    localStorage['units'] = options['units'];
 
     console.log('Got options: ' + JSON.stringify(options));
     return options;
@@ -165,21 +185,27 @@
       var secondHandCheckbox = document.getElementById('show_second_hand_checkbox');
       var dateCheckbox = document.getElementById('show_date_checkbox');
       var temperatureCheckbox = document.getElementById('show_temperature_checkbox');
+      var usUnits = document.getElementById('us_radio');
+      var siUnits = document.getElementById('si_radio');
 
     // Load any previously saved configuration, if available
-    //if(localStorage['show_second_hand']) {
-      if (localStorage['background_color']) backgroundColorPicker.value = localStorage['background_color'];
-      if (localStorage['label_color']) labelColorPicker.value = localStorage['label_color'];
-      if (localStorage['hour_mark_color']) hourMarkColorPicker.value = localStorage['hour_mark_color'];
-      if (localStorage['minute_mark_color']) minuteMarkColorPicker.value = localStorage['minute_mark_color'];
-      if (localStorage['hour_hand_color']) hourHandColorPicker.value = localStorage['hour_hand_color'];
-      if (localStorage['minute_hand_color']) minuteHandColorPicker.value = localStorage['minute_hand_color'];
-      if (localStorage['second_hand_color']) secondHandColorPicker.value = localStorage['second_hand_color'];
-      if (localStorage['show_numbers']) numbersCheckbox.checked = JSON.parse(localStorage['show_numbers']);
-      if (localStorage['show_second_hand']) secondHandCheckbox.checked = JSON.parse(localStorage['show_second_hand']);
-      if (localStorage['show_date']) dateCheckbox.checked = JSON.parse(localStorage['show_date']);
-      if (localStorage['show_temperature']) temperatureCheckbox.checked = JSON.parse(localStorage['show_temperature']);
-    //}
+    if (localStorage['background_color']) backgroundColorPicker.value = localStorage['background_color'];
+    if (localStorage['label_color']) labelColorPicker.value = localStorage['label_color'];
+    if (localStorage['hour_mark_color']) hourMarkColorPicker.value = localStorage['hour_mark_color'];
+    if (localStorage['minute_mark_color']) minuteMarkColorPicker.value = localStorage['minute_mark_color'];
+    if (localStorage['hour_hand_color']) hourHandColorPicker.value = localStorage['hour_hand_color'];
+    if (localStorage['minute_hand_color']) minuteHandColorPicker.value = localStorage['minute_hand_color'];
+    if (localStorage['second_hand_color']) secondHandColorPicker.value = localStorage['second_hand_color'];
+    if (localStorage['show_numbers']) numbersCheckbox.checked = JSON.parse(localStorage['show_numbers']);
+    if (localStorage['show_second_hand']) secondHandCheckbox.checked = JSON.parse(localStorage['show_second_hand']);
+    if (localStorage['show_date']) dateCheckbox.checked = JSON.parse(localStorage['show_date']);
+    if (localStorage['show_temperature']) temperatureCheckbox.checked = JSON.parse(localStorage['show_temperature']);
+    if (localStorage['units']) {
+      if (localStorage['units'] == 'si') {
+        siUnits.checked = true;
+        usUnits.checked = false;
+      }
+    }
   })();
   </script>
 </html>
