@@ -1,5 +1,5 @@
-var darkSkyApiKey = '';
-var units = 'us';
+var openWeatherMapApiKey = '';
+var units = 'imperial';
 
 if (localStorage.units) {
 	units = localStorage.units;
@@ -93,15 +93,19 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 function getTemp(lat, lon, callback) {
 	var req = new XMLHttpRequest();
-	//var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=imperial&APPID=0d0bd6b864810a08eb392c04500bf80b';
-	var url = 'https://api.forecast.io/forecast/' + darkSkyApiKey + '/' + lat + ',' + lon + '?units=' + units;
+	var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=' + units + '&APPID=' + openWeatherMapApiKey;
 	console.log(url);
 	req.open('GET', url, true);
 	req.onload = function(e) {
 		if (req.readyState == 4 && req.status == 200) {
 			if(req.status == 200) {
 				var res = JSON.parse(req.responseText);
-				var temp = res.currently.temperature;
+				var temp = res.main.temp;
+
+				if (units == 'si') {
+
+				}
+
 				callback(null, temp);
 			}
 			else {
