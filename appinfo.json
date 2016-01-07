@@ -26,6 +26,7 @@
                 "file": "data/minute_marks.pdc",
                 "name": "MINUTE_MARKS",
                 "targetPlatforms": [
+                    "aplite",
                     "basalt",
                     "chalk"
                 ],
@@ -35,6 +36,7 @@
                 "file": "data/hour_marks.pdc",
                 "name": "HOUR_MARKS",
                 "targetPlatforms": [
+                    "aplite",
                     "basalt",
                     "chalk"
                 ],
@@ -45,11 +47,12 @@
     "sdkVersion": "3",
     "shortName": "Engineering",
     "targetPlatforms": [
+        "aplite",
         "basalt",
         "chalk"
     ],
     "uuid": "ff541ca4-a444-4513-879a-35ff9ec48a1b",
-    "versionLabel": "1.0",
+    "versionLabel": "1.2",
     "watchapp": {
         "watchface": true
     }

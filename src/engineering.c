@@ -331,15 +331,25 @@ static void window_unload(Window *window) {
 	gdraw_command_image_destroy(s_command_image_minute_marks);
 }
 
-static void init() {
-
+static void init() {	
+	
+	// Default colors
 	gcolor_background = GColorBlack;
-	gcolor_hour_marks = GColorLightGray;
-	gcolor_minute_marks = GColorDarkGray;
-	gcolor_numbers = GColorLightGray;
-	gcolor_hour_hand = GColorRed;
 	gcolor_minute_hand = GColorWhite;
-	gcolor_second_hand = GColorRed;
+	
+	#ifdef PBL_COLOR
+		gcolor_hour_marks = GColorLightGray;
+		gcolor_minute_marks = GColorDarkGray;
+		gcolor_numbers = GColorLightGray;
+		gcolor_hour_hand = GColorRed;
+		gcolor_second_hand = GColorRed;
+	#else
+		gcolor_hour_marks = GColorWhite;
+		gcolor_minute_marks = GColorWhite;
+		gcolor_numbers = GColorWhite;
+		gcolor_hour_hand = GColorWhite;
+		gcolor_second_hand = GColorWhite;
+	#endif
 
 	b_show_numbers = true;
 	b_show_second_hand = true;
