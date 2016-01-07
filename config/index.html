@@ -79,12 +79,12 @@
       <div class='item-container-header'>Units</div>
       <div class='item-container-content'>
         <label class='item'>
-          US
-          <input id='us_radio' type='radio' name='units' class='item-radio' value="US" checked="true"/>
+          Imperial
+          <input id='imperial_radio' type='radio' name='units' class='item-radio' value="imperial" checked="true"/>
         </label>
         <label class='item'>
-          SI
-          <input id='si_radio' type='radio' name='units' class='item-radio' value="SI"/>
+          Metric
+          <input id='metric_radio' type='radio' name='units' class='item-radio' value="metric"/>
         </label>
       </div>
       <div class='item-container-footer'>
@@ -111,11 +111,11 @@
     var secondHandCheckbox = document.getElementById('show_second_hand_checkbox');
     var dateCheckbox = document.getElementById('show_date_checkbox');
     var temperatureCheckbox = document.getElementById('show_temperature_checkbox');
-    var usUnits = document.getElementById('us_radio');
-    var siUnits = document.getElementById('si_radio');
+    var imperialUnits = document.getElementById('imperial_radio');
+    var metricUnits = document.getElementById('metric_radio');
 
     var units = 'us';
-    if (siUnits.checked) {
+    if (metricUnits.checked) {
       units = 'si';
     }
 
@@ -185,8 +185,8 @@
       var secondHandCheckbox = document.getElementById('show_second_hand_checkbox');
       var dateCheckbox = document.getElementById('show_date_checkbox');
       var temperatureCheckbox = document.getElementById('show_temperature_checkbox');
-      var usUnits = document.getElementById('us_radio');
-      var siUnits = document.getElementById('si_radio');
+      var imperialUnits = document.getElementById('imperial_radio');
+      var metricUnits = document.getElementById('metric_radio');
 
     // Load any previously saved configuration, if available
     if (localStorage['background_color']) backgroundColorPicker.value = localStorage['background_color'];
@@ -201,9 +201,9 @@
     if (localStorage['show_date']) dateCheckbox.checked = JSON.parse(localStorage['show_date']);
     if (localStorage['show_temperature']) temperatureCheckbox.checked = JSON.parse(localStorage['show_temperature']);
     if (localStorage['units']) {
-      if (localStorage['units'] == 'si') {
-        siUnits.checked = true;
-        usUnits.checked = false;
+      if (localStorage['units'] == 'metric') {
+        metricUnits.checked = true;
+        imperialUnits.checked = false;
       }
     }
   })();
