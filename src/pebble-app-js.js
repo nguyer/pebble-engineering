@@ -39,7 +39,7 @@ Pebble.addEventListener('ready',function(e) {
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-  var url = 'https://rawgit.com/nguyer/pebble-engineering/3ff907c7a0a0482ba09e30ef2ed76653e8413f92/config/index.html';
+  var url = 'https://rawgit.com/nguyer/pebble-engineering/21702d97d5d6bc012e01d0d3adc105144553a6f3/config/index.html';
   console.log('Showing configuration page: ' + url);
 
   Pebble.openURL(url);
