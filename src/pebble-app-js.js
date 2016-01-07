@@ -93,8 +93,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 function getTemp(lat, lon, callback) {
 	var req = new XMLHttpRequest();
-	var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=' + units + '&APPID=' + openWeatherMapApiKey;
+	var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&units=' + units + '&APPID=';
 	console.log(url);
+	url += openWeatherMapApiKey;
 	req.open('GET', url, true);
 	req.onload = function(e) {
 		if (req.readyState == 4 && req.status == 200) {
