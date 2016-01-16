@@ -14,8 +14,12 @@
 #define KEY_COLOR_MINUTE_HAND 10
 #define KEY_COLOR_SECOND_HAND 11
 
+#define INSET PBL_IF_ROUND_ELSE(1, 0)
+#define HOURS_RADIUS 3
+
 char *uppercase(char *str);
 
+#ifdef PBL_RECT
 static const GPathInfo MINUTE_HAND_POINTS = {
   9,
   (GPoint []) {
@@ -30,7 +34,6 @@ static const GPathInfo MINUTE_HAND_POINTS = {
 	{ -2, -20 }
   }
 };
-
 static const GPathInfo HOUR_HAND_POINTS = {
   9, (GPoint []){
     { -2, 0 },
@@ -44,3 +47,32 @@ static const GPathInfo HOUR_HAND_POINTS = {
 	{ -2, -15 }
   }
 };
+#else
+static const GPathInfo MINUTE_HAND_POINTS = {
+  9,
+  (GPoint []) {
+	{ -2, 0},
+	{ 2, 0 },
+	{ 2, -25 },
+	{ 4, -25 },
+    { 4, -75 },
+	{ 0, -79 },
+	{ -4, -75 },
+	{ -4, -25 },
+	{ -2, -25 }
+  }
+};
+static const GPathInfo HOUR_HAND_POINTS = {
+  9, (GPoint []){
+    { -2, 0 },
+	{ 2, 0 },
+	{ 2, -20 },
+	{ 4, -20 },
+    { 4, -59 },
+	{ 0, -63 },
+	{ -4, -59 },
+	{ -4, -20 },
+	{ -2, -20 }
+  }
+};
+#endif

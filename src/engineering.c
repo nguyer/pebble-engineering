@@ -8,8 +8,6 @@ static TextLayer *s_day_label, *s_num_label;
 
 static GPath *s_minute_arrow, *s_hour_arrow;
 static char s_date_buffer[7], s_temp_buffer[5];
-static GDrawCommandImage *s_command_image_hour_marks;
-static GDrawCommandImage *s_command_image_minute_marks;
 
 static AppSync s_sync;
 static uint8_t s_sync_buffer[64];
@@ -88,7 +86,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
  	if(temperature_t) {
 		snprintf(s_temp_buffer, 5, "%d°", temperature_t->value->int16);
 		APP_LOG(APP_LOG_LEVEL_INFO, s_temp_buffer);
- 		//strcpy(s_temp_buffer, temperature_t->value->cstring);
  	}
 
 	Tuple *show_numbers_t = dict_find(iter, KEY_SHOW_NUMBERS);
@@ -180,30 +177,85 @@ static bool color_minute_marks(GDrawCommand *command, uint32_t index, void *cont
   return true;
 }
 
+
+static int32_t get_angle_for_hour(int hour) {
+  // Progress through 12 hours, out of 360 degrees
+  return (hour * 360) / 12;
+}
+
+static int32_t get_angle_for_minute(int hour) {
+  // Progress through 60 miunutes, out of 360 degrees
+  return (hour * 360) / 60;
+}
+
+
 static void bg_update_proc(Layer *layer, GContext *ctx) {
 	GRect bounds = layer_get_bounds(layer);
-	GPoint origin = GPoint((bounds.size.w - 144) / 2, (bounds.size.h - 168) / 2);
+	GRect frame = grect_inset(bounds, GEdgeInsets(4 * INSET));
+	GRect inner_hour_frame = grect_inset(bounds, GEdgeInsets((4 * INSET) + 8));
+	GRect inner_minute_frame = grect_inset(bounds, GEdgeInsets((4 * INSET) + 6));
+	
+	graphics_context_set_stroke_color(ctx, gcolor_hour_marks);
+	graphics_context_set_stroke_width(ctx, 3);
 
-	if (s_command_image_hour_marks) {
-		// Draw it
-		gdraw_command_list_iterate(gdraw_command_image_get_command_list(s_command_image_hour_marks), color_hour_marks, &ctx);
-		gdraw_command_image_draw(ctx, s_command_image_hour_marks, origin);
+	// Hours marks
+	for(int i = 0; i < 12; i++) {
+		int hour_angle = get_angle_for_hour(i);
+		GPoint p0 = gpoint_from_polar(frame, GOvalScaleModeFitCircle, DEG_TO_TRIGANGLE(hour_angle));
+		GPoint p1 = gpoint_from_polar(inner_hour_frame, GOvalScaleModeFitCircle, DEG_TO_TRIGANGLE(hour_angle));
+		graphics_draw_line(ctx, p0, p1);
 	}
-	if (s_command_image_minute_marks) {
-		// Draw it
-		gdraw_command_list_iterate(gdraw_command_image_get_command_list(s_command_image_minute_marks), color_minute_marks, &ctx);
-		gdraw_command_image_draw(ctx, s_command_image_minute_marks, origin);
+	
+	// Minute Marks
+	graphics_context_set_stroke_color(ctx, gcolor_minute_marks);
+	graphics_context_set_stroke_width(ctx, 1);
+	for(int i = 0; i < 60; i++) {
+		if (i % 5) {
+			int minute_angle = get_angle_for_minute(i);
+			GPoint p0 = gpoint_from_polar(frame, GOvalScaleModeFitCircle, DEG_TO_TRIGANGLE(minute_angle));
+			GPoint p1 = gpoint_from_polar(inner_minute_frame, GOvalScaleModeFitCircle, DEG_TO_TRIGANGLE(minute_angle));
+			graphics_draw_line(ctx, p0, p1);
+		}
+	}
+	
+	// numbers
+	if (b_show_numbers) {
+		graphics_context_set_text_color(ctx, gcolor_numbers);
+		
+#ifdef PBL_RECT
+		graphics_draw_text(ctx, "12", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(63, 18, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, "1", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(85, 23, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "2", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(104, 43, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "3", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(112, 68, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "4", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(104, 93, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "5", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(85, 110, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "6", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(62, 118, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, "7", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(39, 110, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "8", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(20, 93, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "9", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(14, 68, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "10", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(20, 43, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "11", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(39, 23, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+#else
+		graphics_draw_text(ctx, "12", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(80, 10, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, "1", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(107, 20, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "2", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(130, 43, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "3", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(140, 74, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "4", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(130, 106, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "5", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(107, 126, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+		graphics_draw_text(ctx, "6", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(81, 136, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, "7", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(53, 124, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "8", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(29, 106, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "9", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(20, 74, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "10", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(28, 42, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+		graphics_draw_text(ctx, "11", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(50, 22, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+#endif
 	}
 }
 
 static void hands_update_proc(Layer *layer, GContext *ctx) {
 	GRect bounds = layer_get_bounds(layer);
 	GPoint center = grect_center_point(&bounds);
-	GPoint origin = GPoint((bounds.size.w - 144) / 2, (bounds.size.h - 168) / 2);
 	int16_t second_hand_length = bounds.size.w / 2 - 5;
-	if (second_hand_length > 67) {
-		second_hand_length = 67;
-	}
 	int16_t second_hand_tail_length = 15;
 
 	time_t now = time(NULL);
@@ -220,33 +272,24 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 		.y = (int16_t)(-cos_lookup(second_angle_tail) * (int32_t)second_hand_tail_length / TRIG_MAX_RATIO) + center.y,
 	};
 
-	// numbers
-	if (b_show_numbers) {
-		graphics_context_set_text_color(ctx, gcolor_numbers);
-		graphics_draw_text(ctx, "12", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 63, origin.y + 18, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-		graphics_draw_text(ctx, "1", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 85, origin.y + 23, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, "2", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 104, origin.y + 43, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, "3", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 112, origin.y + 68, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, "4", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 104, origin.y + 93, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, "5", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 85, origin.y + 110, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
-		graphics_draw_text(ctx, "6", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 62, origin.y + 118, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-		graphics_draw_text(ctx, "7", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 39, origin.y + 110, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, "8", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 20, origin.y + 93, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, "9", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 14, origin.y + 68, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, "10", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 20, origin.y + 43, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-		graphics_draw_text(ctx, "11", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(origin.x + 39, origin.y + 23, 20, 20), GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-	}
-
 	// date
 	if (b_show_date) {
 		int offset = !b_show_numbers * 10;
-		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(origin.x + 80, origin.y + 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+#ifdef PBL_RECT
+		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(80, 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+#else
+		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(104, 78, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+#endif
 	}
 
 	// temperature
 	if (b_show_temperature) {
 		int offset = !b_show_numbers * 10;
-		graphics_draw_text(ctx, s_temp_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(origin.x + 27 - offset, origin.y + 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+#ifdef PBL_RECT
+		graphics_draw_text(ctx, s_temp_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(27 - offset, 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+#else
+		graphics_draw_text(ctx, s_temp_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(40 - offset, 78, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+#endif
 	}
 
 	// minute hand
@@ -267,10 +310,8 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 	}
 
 	// dot in the middle
-	//graphics_context_set_stroke_color(ctx, GColorDarkCandyAppleRed);
 	graphics_context_set_fill_color(ctx, gcolor_second_hand);
 	graphics_fill_circle(ctx, GPoint(bounds.size.w / 2, bounds.size.h / 2), 4);
-	//graphics_draw_circle(ctx, GPoint(bounds.size.w / 2, bounds.size.h / 2), 4);
 }
 
 static void date_update_proc(Layer *layer, GContext *ctx) {
@@ -295,16 +336,6 @@ static void window_load(Window *window) {
 
 	window_set_background_color(window, gcolor_background);
 
-	// Load the image and check it was succcessful
-	s_command_image_hour_marks = gdraw_command_image_create_with_resource(RESOURCE_ID_HOUR_MARKS);
-	if (!s_command_image_hour_marks) {
-		APP_LOG(APP_LOG_LEVEL_ERROR, "Image is NULL!");
-	}
-	s_command_image_minute_marks = gdraw_command_image_create_with_resource(RESOURCE_ID_MINUTE_MARKS);
-	if (!s_command_image_minute_marks) {
-		APP_LOG(APP_LOG_LEVEL_ERROR, "Image is NULL!");
-	}
-
 	s_date_layer = layer_create(bounds);
 	layer_set_update_proc(s_date_layer, date_update_proc);
 	layer_add_child(window_layer, s_date_layer);
@@ -314,7 +345,6 @@ static void window_load(Window *window) {
 	layer_add_child(window_layer, s_hands_layer);
 
 	load_persisted_values();
-
 }
 
 static void window_unload(Window *window) {
@@ -325,10 +355,6 @@ static void window_unload(Window *window) {
 	text_layer_destroy(s_num_label);
 
 	layer_destroy(s_hands_layer);
-
-	// Destroy the image
-	gdraw_command_image_destroy(s_command_image_hour_marks);
-	gdraw_command_image_destroy(s_command_image_minute_marks);
 }
 
 static void init() {	

@@ -21,28 +21,7 @@
     "longName": "Engineering",
     "projectType": "native",
     "resources": {
-        "media": [
-            {
-                "file": "data/minute_marks.pdc",
-                "name": "MINUTE_MARKS",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "raw"
-            },
-            {
-                "file": "data/hour_marks.pdc",
-                "name": "HOUR_MARKS",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "raw"
-            }
-        ]
+        "media": []
     },
     "sdkVersion": "3",
     "shortName": "Engineering",
@@ -52,7 +31,7 @@
         "chalk"
     ],
     "uuid": "ff541ca4-a444-4513-879a-35ff9ec48a1b",
-    "versionLabel": "1.4",
+    "versionLabel": "1.5",
     "watchapp": {
         "watchface": true
     }
