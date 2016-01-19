@@ -274,16 +274,18 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 
 	// date
 	if (b_show_date) {
+		graphics_context_set_text_color(ctx, gcolor_numbers);
 		int offset = !b_show_numbers * 10;
 #ifdef PBL_RECT
 		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(80, 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 #else
-		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(104, 78, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, s_date_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(100, 78, 45 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 #endif
 	}
 
 	// temperature
 	if (b_show_temperature) {
+		graphics_context_set_text_color(ctx, gcolor_numbers);
 		int offset = !b_show_numbers * 10;
 #ifdef PBL_RECT
 		graphics_draw_text(ctx, s_temp_buffer, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(27 - offset, 75, 40 + offset, 14), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
